@@ -59,6 +59,24 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+class Cloud(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Cloud, self).__init__()
+        self.surf = pygame.image.load('cloud.png').convert()
+        self.surf.set_colorkey((0,0,0), RLEACCEL)
+        # Random starting position
+        self.rect = self.surf.get_rect(
+            center = (
+                random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100),
+                random.randint(0, SCREEN_HEIGHT),
+            )
+        )
+    def update(self):
+        self.rect.move_ip(-5,0)
+        if self.rect.right < 0:
+            self.kill()
+
+
 # Define constants for screen H/W
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700
@@ -73,6 +91,8 @@ clock = pygame.time.Clock()
 # USEREVENT is the last event pygame reserves, so adding 1 ensures its unique
 ADDENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDENEMY, 500)
+ADDCLOUD = pygame.USEREVENT + 2
+pygame.time.set_timer(ADDCLOUD, 1000)
 
 # Instantiate player - before this line it is just a rectangle
 player = Player()
@@ -81,6 +101,7 @@ player = Player()
 # - enemies is used for collision detection and position updates
 # - all_sprites is used for rendering
 enemies = pygame.sprite.Group()
+clouds = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
@@ -102,6 +123,11 @@ while running:
             new_enemy = Enemy()
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
+        # Add new cloud?
+        elif event.type == ADDCLOUD:
+            new_cloud = Cloud()
+            clouds.add(new_cloud)
+            all_sprites.add(new_cloud)
 
 
     # Get all keys currently pressed
@@ -110,8 +136,9 @@ while running:
     # Update player sprite based on user keypresses
     player.update(pressed_keys)
     
-    # Update enemies
+    # Update enemies and clouds
     enemies.update()
+    clouds.update()
 
     screen.fill((135,206,250))
 
